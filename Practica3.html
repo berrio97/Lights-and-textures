@@ -1,0 +1,163 @@
+<!-- ALVARO BERRIO GALINDO -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Luz y texturas</title>
+
+  <style>
+  body{
+    width:1000px;
+    height:60px;
+  }
+  canvas{
+    margin-left:100px;
+    float:left;
+  }
+
+  p{
+    text-align: center;
+  }
+
+  .rbutton{
+    width: 100px;
+    height: 15px;
+    float:left;
+  }
+
+  .radiobuttons{
+    float:left;
+    font-family:Arial;
+    width:200px;
+    height:50px;
+    margin-top:50px;
+    margin-left:20px;
+    border: 1px solid #000;
+    border-radius: 20px;
+    background-color: LemonChiffon ;
+  }
+
+  .slidecontainer{
+    margin-top:50px;
+    float:left;
+    display:block;
+    border: 1px solid #000;
+    border-radius: 20px;
+    margin-left: 20px;
+    background-color: LemonChiffon ;
+    display:block;
+  }
+  .slider {
+    -webkit-appearance: none;
+    width: 250px;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    float:left;
+    margin-bottom: 30px;
+  }
+  .slider:hover{
+    opacity:1;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  .slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+
+  </style>
+
+    <!-- Vertex shader program -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      uniform mat4 u_perspectiveMatrix;
+      uniform mat4 u_modelMatrix;
+      uniform mat4 u_viewMatrix;
+
+      attribute vec4 a_Position;
+      attribute vec3 a_Normal;
+
+      varying vec4 v_Position;
+      varying vec3 v_Normal;
+
+      attribute vec2 aTexCoord;
+      //Textura
+      varying vec2 vTexCoord;
+
+      void main() {
+        mat4 modelViewMatrix = u_viewMatrix * u_modelMatrix;
+        v_Position = modelViewMatrix * a_Position;
+        gl_Position = u_perspectiveMatrix * v_Position;
+        v_Normal = normalize( mat3(modelViewMatrix) * a_Normal);
+        vTexCoord=aTexCoord;
+      }
+    </script>
+
+    <!-- Fragment shader program -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      #ifdef GL_ES
+        precision mediump float;
+      #endif
+      uniform vec3 u_lightPosition;
+
+      varying vec4 v_Position;
+      varying vec3 v_Normal;
+
+      varying vec2 vTexCoord;
+      uniform sampler2D uTexture;
+
+      uniform float ambiente,difusa;
+      void main() {
+        vec3 normal = v_Normal;
+        vec3 lightDir = normalize(vec3(vec4(u_lightPosition, 1) - v_Position));
+
+        float d = max(dot(v_Normal, lightDir), 0.0);
+
+        gl_FragColor = texture2D(uTexture,vec2(vTexCoord.s,vTexCoord.t))*
+        (vec4(ambiente,ambiente,ambiente,1.0) + vec4(difusa, difusa, difusa,1.0)*d);
+          gl_FragColor.a = 1.0;
+      }
+    </script>
+  </head>
+    <script type="text/javascript" src="./lib/GlMatrix.js"></script>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script src="./lib/cuon-matrix.js"></script>
+
+    <body onload="initWebGL()">
+      <h1 style="margin-left:150px">Práctica 3: Luces y texturas</h1>
+      <h2 style="margin-left:200px">Álvaro Berrío Galindo</h2>
+      <canvas id="canvas" width="512" height="512">
+      Oops ... your browser doesn't support the HTML5 canvas element
+      </canvas>
+
+      <form class="radiobuttons" name ="rbutton">
+        <input type="radio" class="rbutton" name="text" value="telas.jpg"> Telas<br>
+        <input type="radio" class="rbutton" name="text" value="naturaleza.jpg"> Naturaleza<br>
+      </form>
+      <div class="slidecontainer">
+        <p>LUZ AMBIENTE</p>
+        <input type="checkbox" id="box_ambiente" checked>
+        <input type="range" min="0" max="100" class="slider" id="luz_ambiente">
+        <p>LUZ DIFUSA</p>
+        <input type="checkbox" id="box_difusa"checked>
+        <input type="range" min="0" max="100" class="slider" id="luz_difusa">
+      </div>
+    </body>
+    <script src="Practica3.js"></script>
+</html>
